@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alice in Wonderland Quiz</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; background: #ffccff; color: black; }
+        .container { max-width: 400px; margin: 50px auto; padding: 20px; background: #ff99ff; border-radius: 10px; }
+        .quiz-btn { background: #ff66b2; color: white; border: none; padding: 10px; margin: 10px; cursor: pointer; border-radius: 5px; display: block; width: 100%; }
+        .quiz-btn:hover { background: #ff3385; }
+        .hidden { display: none; }
+        #timer { font-size: 20px; margin: 10px 0; }
+        #explanation { font-size: 16px; margin-top: 10px; color: #660033; }
+        #next-btn { background: #800080; color: white; border: none; padding: 10px; margin: 10px; cursor: pointer; border-radius: 5px; display: none; }
+        #next-btn:hover { background: #660066; }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Alice in Wonderland Quiz</h1>
+        <p id="timer"></p>
+        <p id="question"></p>
+        <div id="answers"></div>
+        <p id="explanation" class="hidden"></p>
+        <button id="next-btn" onclick="nextQuestion()">Next</button>
+    </div>
+
+    <script>
+        const questions = [
+            { q: "Who wrote 'Alice in Wonderland'?", a: ["Lewis Carroll", "J.K. Rowling", "Tolkien"], c: 0, exp: "Lewis Carroll wrote the book in 1865." },
+            { q: "Which animal is always in a hurry?", a: ["White Rabbit", "Cheshire Cat", "Caterpillar"], c: 0, exp: "The White Rabbit is always rushing around, checking his watch." },
+            { q: "Which drink shrinks Alice?", a: ["Tea", "Potion", "Milk"], c: 1, exp: "The potion labeled 'Drink Me' made Alice shrink." },
+            { q: "What color roses did the cards want to repaint?", a: ["Red", "White", "Yellow"], c: 1, exp: "The cards painted white roses red." },
+            { q: "Which creature posed difficult riddles to Alice?", a: ["Caterpillar", "Cheshire Cat", "Mad Hatter"], c: 2, exp: "The Mad Hatter held a Mad Tea Party and asked riddles." },
+            { q: "What was the name of the evil queen?", a: ["White Queen", "Red Queen", "Capricious Queen"], c: 1, exp: "The Red Queen threatened to chop off everyone's heads!" },
+            { q: "What animals were used in the Queen's croquet game?", a: ["Flamingos and hedgehogs", "Rabbits and turtles", "Cats and mice"], c: 0, exp: "The Queen played croquet with flamingos as mallets and hedgehogs as balls." },
+            { q: "Which creature helped Alice find her way?", a: ["Caterpillar", "Cheshire Cat", "Griffin"], c: 1, exp: "The Cheshire Cat showed Alice different paths." },
+            { q: "What did the bottle Alice drank say?", a: ["Drink Me", "Eat Me", "Open Me"], c: 0, exp: "The bottle had the label 'Drink Me', and Alice shrank." },
+            { q: "Who led Alice at the trial?", a: ["Mad Hatter", "White Rabbit", "Cheshire Cat"], c: 1, exp: "The White Rabbit announced the trial of the Queen." }
+        ];
+        
+        let index = 0, score = 0, timeLeft;
+        let timerInterval;
+        const qEl = document.getElementById("question");
+        const aEl = document.getElementById("answers");
+        const expEl = document.getElementById("explanation");
+        const nextBtn = document.getElementById("next-btn");
+        const timerEl = document.getElementById("timer");
+
+        function startTimer() {
+            timeLeft = 30;
+            timerEl.textContent = `Time: ${timeLeft} sec.`;
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                timerEl.textContent = `Time: ${timeLeft} sec.`;
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    lockAnswers();
+                }
+            }, 1000);
+        }
+
+        function loadQuestion() {
+            clearInterval(timerInterval);
+            expEl.classList.add("hidden");
+            nextBtn.style.display = "none";
+
+            let qData = questions[index];
+            qEl.textContent = qData.q;
+            aEl.innerHTML = "";
+
+            qData.a.forEach((ans, i) => {
+                let btn = document.createElement("button");
+                btn.textContent = ans;
+                btn.classList.add("quiz-btn");
+                btn.onclick = () => checkAnswer(i, qData.c, qData.exp);
+                aEl.appendChild(btn);
+            });
+
+            startTimer();
+        }
+
+        function checkAnswer(i, correct, explanation) {
+            clearInterval(timerInterval);
+            let buttons = document.querySelectorAll(".quiz-btn");
+            buttons.forEach(btn => btn.disabled = true);
+            buttons[correct].style.background = "green";
+            if (i === correct) {
+                score++;
+            } else {
+                buttons[i].style.background = "red";
+            }
+            expEl.textContent = explanation;
+            expEl.classList.remove("hidden");
+            nextBtn.style.display = "block";
+        }
+
+        function lockAnswers() {
+            let buttons = document.querySelectorAll(".quiz-btn");
+            buttons.forEach(btn => btn.disabled = true);
+            expEl.textContent = "Time's up!";
+            expEl.classList.remove("hidden");
+            nextBtn.style.display = "block";
+        }
+
+        function nextQuestion() {
+            index++;
+            if (index < questions.length) {
+                loadQuestion();
+            } else {
+                showResult();
+            }
+        }
+
+        function showResult() {
+            qEl.textContent = `You scored ${score} out of ${questions.length} points!`;
+            aEl.innerHTML = "";
+            expEl.classList.add("hidden");
+            nextBtn.remove();
+            timerEl.remove();
+        }
+
+        loadQuestion();
+    </script>
+</body>
+</html>
